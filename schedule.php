@@ -124,8 +124,8 @@
 				<tr>
 					<td class="valve_value_name">Mode:</td>
 					<td>
-						<input type="radio" name="valve'.$valveIndex.'_mode" value="auto" onClick="showAuto('.$valveIndex.')" '.$autoRadioSelected.'/> Auto &nbsp&nbsp 
-						<input type="radio" name="valve'.$valveIndex.'_mode" value="manual" onClick="showControl('.$valveIndex.')" '.$manualRadioSelected.'/> Manual
+						<label for="valve'.$valveIndex.'_modeAuto"><input type="radio" id="valve'.$valveIndex.'_modeAuto" name="valve'.$valveIndex.'_mode" value="auto" onClick="showAuto('.$valveIndex.')" '.$autoRadioSelected.'/> Auto &nbsp&nbsp </label>
+						<label for="valve'.$valveIndex.'_modeManual"><input type="radio" id="valve'.$valveIndex.'_modeManual" name="valve'.$valveIndex.'_mode" value="manual" onClick="showControl('.$valveIndex.')" '.$manualRadioSelected.'/> Manual  </label>
 					</td>
 				</tr>
 				<tr id="valve'.$valveIndex.'_days" style="'.$daysRowStyle.'" >
@@ -339,8 +339,8 @@
 			<tr>
 				<td class="general_config_name">Schedule is:</td>
 				<td>
-					<input type="radio" id="masterControlOn" name="masterControl" value="controlOn" <?php schedule_getMasterControl($schedule_storedSchedule, true); ?> /> Active  
-					<input type="radio" id="masterControlOff" name="masterControl" value="controlOff" <?php schedule_getMasterControl($schedule_storedSchedule, false); ?> /> Inactive 
+					<label for="masterControlOn"><input type="radio" id="masterControlOn" name="masterControl" value="controlOn" <?php schedule_getMasterControl($schedule_storedSchedule, true); ?> /> Active </label>
+					<label for="masterControlOff"><input type="radio" id="masterControlOff" name="masterControl" value="controlOff" <?php schedule_getMasterControl($schedule_storedSchedule, false); ?> /> Inactive </label>
 				</td>
 			</tr>
 			<tr>
@@ -354,7 +354,7 @@
 					</select>
 				</td>
 				<td>
-					<input type="submit" name="scheduleSave" value=" Apply Schedule " class="button"  style="margin-left:295px;" />
+					<input type="submit" name="scheduleSave" value=" Save Settings " class="button"  style="margin-left:295px;" />
 				</td>
 			</tr>
 			<tr>
