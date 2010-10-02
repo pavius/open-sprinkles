@@ -23,7 +23,6 @@
 
 		// get the menu items
 		$menuItems = array("/schedule.php" => "Schedule", 
-				   "/status.php" => "Status",
 				   "/administration.php" => "Administration",
 				   );
 

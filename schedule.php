@@ -87,7 +87,7 @@
 	}
 
 	// outputs a valve
-	function schedule_outputValve($storedSchedule, $style, $valveIndex, $valve)
+	function schedule_outputValve($storedSchedule, $style, $valveIndex, $valveIsOpen)
 	{
 		// get days of week checkboxes
 		$daysOfWeek = schedule_getValveDays($storedSchedule, $valveIndex, array("S", "M", "T", "W", "T", "F", "S"));	
@@ -108,11 +108,13 @@
 			$daysRowStyle = "display:none;";
 		}
 				
-
+		// get valve status
+		$valveStatus = $valveIsOpen ? " (On)" : "";
+	
 		// echo it
 		echo '<div class="valve_wrapper" style="'.$style.'">		
 				<fieldset class="base">
-				<legend class="base_legend">Valve #'.($valveIndex + 1).'</legend>
+				<legend class="base_legend">Valve #'.($valveIndex + 1).$valveStatus.'</legend>
 				<div>				
 				<table border="0">
 				<tr>
@@ -153,6 +155,9 @@
 	// outputs all valves
 	function schedule_outputValves($storedSchedule)
 	{
+		// get which valves are open
+		$valvesCurrentlyOpen = operateValves_getCurrentlyOpenValves();
+
 		// iterate through all valves
 		for ($valveIndex = 0; $valveIndex < count($storedSchedule->valves); $valveIndex++)
 		{
@@ -160,7 +165,7 @@
 			$valveStyle = "float: left";		
 			 
 			// output valve
-			schedule_outputValve($storedSchedule, $valveStyle, $valveIndex, 0);
+			schedule_outputValve($storedSchedule, $valveStyle, $valveIndex, $valvesCurrentlyOpen[$valveIndex]);
 		}  
 	}
 	
@@ -349,7 +354,7 @@
 					</select>
 				</td>
 				<td>
-					<input type="submit" name="scheduleSave" value=" Save " class="button" style="margin-left:375px;"/>
+					<input type="submit" name="scheduleSave" value=" Apply Schedule " class="button"  style="margin-left:295px;" />
 				</td>
 			</tr>
 			<tr>
