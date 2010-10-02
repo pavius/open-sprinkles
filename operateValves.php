@@ -128,19 +128,31 @@
 					// get current valve
 					$currentValve = $storedSchedule->valves[$valveIndex];
 	
-					// check if this day is on for this valve and
-					// check if a duration is set, don't add if day set but duration not
-					if ($currentValve->daysToOperate[$dayIndex] && $currentValve->operationDurationInMinutes)
+					// check if mode is automatic
+					if ($currentValve->mode == 0)
 					{
-						// find the earlist scheduling slot for this valve, allowing the max concurrent valves
-						$valveSlotIndex = valveSchedulingSlotsFindEarliestSlot($valveSchedulingSlots);
+						// check if this day is on for this valve and
+						// check if a duration is set, don't add if day set but duration not
+						if ($currentValve->daysToOperate[$dayIndex] && $currentValve->operationDurationInMinutes)
+						{
+							// find the earlist scheduling slot for this valve, allowing the max concurrent valves
+							$valveSlotIndex = valveSchedulingSlotsFindEarliestSlot($valveSchedulingSlots);
 
-						// schedule the valve at this time
-						$weeklyValveSchedule[$valveIndex]->addRange($valveSchedulingSlots[$valveSlotIndex], 
-																	$valveSchedulingSlots[$valveSlotIndex] + $currentValve->operationDurationInMinutes);
+							// schedule the valve at this time
+							$weeklyValveSchedule[$valveIndex]->addRange($valveSchedulingSlots[$valveSlotIndex], 
+																		$valveSchedulingSlots[$valveSlotIndex] + $currentValve->operationDurationInMinutes);
 
-						// add the duration to the valve slot
-						$valveSchedulingSlots[$valveSlotIndex] += $currentValve->operationDurationInMinutes;	
+							// add the duration to the valve slot
+							$valveSchedulingSlots[$valveSlotIndex] += $currentValve->operationDurationInMinutes;	
+						}
+					}
+					// check if mode is manual and a manual start time is set
+					else if ($currentValve->mode == 1 && $currentValve->manualStartTime != -1)
+					{
+						// set the valve to turn on at the time the manual start time was given + its duration
+						$weeklyValveSchedule[$valveIndex]->addRange($currentValve->manualStartTime,
+																	$currentValve->manualStartTime + $currentValve->operationDurationInMinutes);
+						
 					}
 				}
 			}

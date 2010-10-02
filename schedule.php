@@ -164,24 +164,53 @@
 		}  
 	}
 	
-	//		
-	// check if anything has been posted
-	//
-	if ($_POST)
+	// load data from the form into a schedule
+	function schedule_saveScheduleToFile($schedule, $fileName)
+	{
+		// save to file
+		$fp = fopen($fileName, 'w');
+	
+		// check
+		if ($fp) 
+		{
+			// log
+			logger_logEvent('Updating configuration');
+	
+			// write
+			fwrite($fp, serialize($schedule));
+			fclose($fp);
+
+			// success
+			return true;
+		}
+		else return false;
+	}
+
+	// load data from the form into a schedule
+	function schedule_loadPostedFormToSchedule(&$schedule)
 	{
 		// iterate over all valves
-		for ($valveIndex = 0; $valveIndex < $schedule_numberOfValves; $valveIndex++)
+		for ($valveIndex = 0; $valveIndex < count($schedule->valves); $valveIndex++)
 		{
-			// new valve
-			$valve = new ScheduleValve();				
-			
+			// get current valve
+			$valve = $schedule->valves[$valveIndex];
+
 			// set name and duration
 			$valve->name = $_POST['valve'.$valveIndex.'_name'];
 			$valve->operationDurationInMinutes = $_POST['valve'.$valveIndex.'_duration'];
-			
+
 			// set mode
-			if ($_POST['valve'.$valveIndex.'_mode'] == 'auto') 	$valve->mode = 0;
-			else												$valve->mode = 1;						
+			if ($_POST['valve'.$valveIndex.'_mode'] == 'auto')
+			{
+				// set mode to auto and clear start time
+				$valve->mode = 0;
+				$valve->manualStartTime = -1;
+			}
+			else
+			{
+				// set mode to manual, leave start time as is
+				$valve->mode = 1;
+			}
 
 			// iterate dow
 			for ($dayIndex = 0; $dayIndex < 7; $dayIndex++)
@@ -189,70 +218,90 @@
 				// shove if set
 				$valve->daysToOperate[$dayIndex] = isset($_POST['valve'.$valveIndex.'_day'.$dayIndex]);
 			}
-			
-			// shove to array
-			$schedule_storedSchedule->valves[$valveIndex] = $valve; 
 		} 		
 
 		// get master control
-		$schedule_storedSchedule->masterControl = ($_POST['masterControl'] == 'controlOn');
-		
-		// get start hour
-		$schedule_storedSchedule->startHour = $_POST['startHour'];
-		$schedule_storedSchedule->startMinutes = $_POST['startMinutes'];
-	
-		// concurrent open valves
-		$schedule_storedSchedule->maxConcurrentOpenValves = $_POST['maxConcurrentOpenValves'];
-		
-		// save to file
-		$fp = fopen($schedule_configurationFileName, 'w');
-		
-		// check
-		if ($fp) 
-		{
-			// log
-			logger_logEvent('Updating configuration');
-			
-			// write
-			fwrite($fp, serialize($schedule_storedSchedule));
-			fclose($fp);
+		$schedule->masterControl = ($_POST['masterControl'] == 'controlOn');
 
-			// operate the valves accordingly, don't wait for cron
+		// get start hour
+		$schedule->startHour = $_POST['startHour'];
+		$schedule->startMinutes = $_POST['startMinutes'];
+
+		// concurrent open valves
+		$schedule->maxConcurrentOpenValves = $_POST['maxConcurrentOpenValves'];
+	}
+		
+	// create default schedule
+	function schedule_initDefaultSchedule($schedule, $numberOfValves)
+	{
+		// iterate over valves
+		for ($valveIndex = 0; $valveIndex < $numberOfValves; $valveIndex++)
+		{
+			// create default valve
+			$valve = new ScheduleValve();
+				$valve->name = 'Area #'.($valveIndex + 1);
+				$valve->daysToOperate = array(0, 0, 0, 0, 0, 0, 0);   
+				$valve->operationDurationInMinutes = 0;
+
+			// shove to array
+			$schedule->valves[$valveIndex] = $valve;
+		}
+
+		// init master mode and start hour
+		$schedule->masterControl = false; // off
+		$schedule->startHour = 0;
+		$schedule->startMinutes = 0;
+		$schedule->maxConcurrentOpenValves = 1;
+	}
+
+	// load the schedule from file
+	function schedule_loadScheduleFromFile(&$schedule, $fileName)
+	{
+		// check if valve configuration exists
+		if (file_exists($fileName)) 
+		{
+			// load from file
+			$schedule = unserialize(file_get_contents($fileName));
+		}
+	}
+
+	// stored schedule
+	$schedule_storedSchedule = new Schedule();
+
+	// check if anything has been posted
+	if ($_POST)
+	{
+		// load the schedule from file
+		schedule_loadScheduleFromFile($schedule_storedSchedule, $schedule_configurationFileName);
+
+		// update the schedule with data from the form
+		schedule_loadPostedFormToSchedule($schedule_storedSchedule);
+
+		// save to file
+		if (schedule_saveScheduleToFile($schedule_storedSchedule, $schedule_configurationFileName))
+		{
+			// operate the valves now, don't wait for cron
 			operateValves_performActions();
 		}
 	}
 	else 
 	{
-		//
-		// Try to load the data from the saved configuration
-		//		
-
 		// check if valve configuration exists
-		if (file_exists($schedule_configurationFileName)) 
+		if (!file_exists($schedule_configurationFileName)) 
 		{
-		    // load from file
-		    $schedule_storedSchedule = unserialize(file_get_contents($schedule_configurationFileName));
+			// create new scedule
+			$schedule_storedSchedule = new Schedule();
+
+			// initialize the current schedule
+			schedule_initDefaultSchedule($schedule_storedSchedule, $schedule_numberOfValves);
+
+			// save the current schedule so that the configuration file will always exist
+			schedule_saveScheduleToFile($schedule_storedSchedule, $schedule_configurationFileName);	
 		}
 		else
 		{
-			// iterate over valves
-			for ($valveIndex = 0; $valveIndex < $schedule_numberOfValves; $valveIndex++)
-			{
-				// create default valve
-				$valve = new ScheduleValve();
-					$valve->name = 'Area #'.($valveIndex + 1);
-					$valve->daysToOperate = array(0, 0, 0, 0, 0, 0, 0);   
-					$valve->operationDurationInMinutes = 0;
-					
-				// shove to array
-				$schedule_storedSchedule->valves[$valveIndex] = $valve;
-				
-				// init master mode and start hour
-				$schedule_storedSchedule->masterControl = false; // off
-				$schedule_storedSchedule->startHour = 0;
-				$schedule_storedSchedule->startMinutes = 0;
-				$schedule_storedSchedule->maxConcurrentOpenValves = 1;
-			}
+			// Try to load the data from the saved configuration
+			schedule_loadScheduleFromFile($schedule_storedSchedule, $schedule_configurationFileName);
 		}
 	}
 ?>

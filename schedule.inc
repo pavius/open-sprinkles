@@ -36,6 +36,10 @@
 	    // mode (0 = auto, 1 = manual)
 	    // TODO: enum
 	    var $mode;
+
+	    // in case mode is manual, this indicates the time that the
+	    // the valve was set to be open
+	    var $manualStartTime;
 	}
 	
 	// the configuration of the valves
