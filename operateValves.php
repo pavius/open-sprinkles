@@ -1,8 +1,8 @@
 <?php
 
 	// include stuff
-	include('schedule.inc');	
-	include('logger.inc');
+	include_once('schedule.inc');	
+	include_once('logger.inc');
 
 	//
 	// Class definitions
@@ -16,12 +16,12 @@
 		{
 			// save
 			$this->start = $_start;
-         $this->end = $_end;
+			$this->end = $_end;
 		}
 		
 		// members
-      var $start;
-      var $end;
+		var $start;
+		var $end;
 	}
 
 	// time ranges
@@ -43,7 +43,7 @@
 	//
 
 	// temporary valve state filename
-	$operateValves_currentlyOpenValvesFileName = 'operateValves_currentlyOpenValves.cfg';
+	$operateValves_currentlyOpenValvesFileName = 'state/operateValves_currentlyOpenValves.cfg';
 
 	//
 	// Local routines
@@ -178,9 +178,6 @@
 		$currentOffsetMinutesIntoWeek += ($currentTime['tm_hour'] * 60);
 		$currentOffsetMinutesIntoWeek += ($currentTime['tm_wday'] * 24 * 60);
 		
-		// print
-		print 'current offset: '.$currentOffsetMinutesIntoWeek.NEW_LINE;
-		
 		// iterate through valves, find valves with a range holding the current offset
 		for ($valveIndex = 0; $valveIndex < $schedule_numberOfValves; $valveIndex++)
 		{
@@ -310,78 +307,65 @@
 		return $resultString;
 	}
 
+	// read configuration and do whatever is required
+	function operateValves_performActions()
+	{
+		// globals
+		global $schedule_configurationFileName;
+
+		// log entry
+		logger_logEvent('Checking required valve commands');
+
+		// check if valve configuration exists
+		if (file_exists($schedule_configurationFileName)) 
+		{
+			// load from file
+			$storedSchedule = unserialize(file_get_contents($schedule_configurationFileName));
+
+			// convert schedule to a per-valve array of time ranges (start/end)
+			// each range is represented by offset, in minutes, into the week
+			$weeklyValveSchedule = getWeeklyValveSchedule($storedSchedule);
+
+			// generate a list of valves that need to be open right now
+			$valvesRequiredToBeOpen = getListOfValvesCurrentlyRequiredOpen($weeklyValveSchedule);
+
+			// get a list of valves that are currently open
+			$valvesCurrentlyOpen = getCurrentlyOpenValves();
+
+			//
+			// get command lists
+			// 
+
+			// command lists
+			$valvesToOpen = array();
+			$valvesToClose = array();
+
+			// get the commands
+			getValveCommands($valvesRequiredToBeOpen, $valvesCurrentlyOpen, $valvesToOpen, $valvesToClose);
+
+			// execute the commands
+			executeValveCommands($valvesToOpen, $valvesToClose);
+
+			// update currently open valves. TODO get from hardware
+			updateCurrentlyOpenValves($valvesRequiredToBeOpen);
+
+			// print
+			logger_logEvent('Currently open valves: '.arrayToString($valvesCurrentlyOpen, ", "));
+			logger_logEvent('Valves required to be open: '.arrayToString($valvesRequiredToBeOpen, ", "));
+			logger_logEvent('Opening these valves: '.arrayToString($valvesToOpen, ", "));
+			logger_logEvent('Closing these valves: '.arrayToString($valvesToClose, ", "));
+		}
+	}
+
 	//
 	// Entry
 	//
 
-	// log entry
-	logger_logEvent('Checking required valve commands');
-
-	// check if valve configuration exists
-	if (file_exists($schedule_configurationFileName)) 
+	// if run from cli, execute
+	if (php_sapi_name() == 'cli')
 	{
-		// load from file
-		$storedSchedule = unserialize(file_get_contents($schedule_configurationFileName));
-	    
-		// convert schedule to a per-valve array of time ranges (start/end)
-		// each range is represented by offset, in minutes, into the week
-		$weeklyValveSchedule = getWeeklyValveSchedule($storedSchedule);
-
-		// generate a list of valves that need to be open right now
-		$valvesRequiredToBeOpen = getListOfValvesCurrentlyRequiredOpen($weeklyValveSchedule);
-		
-		// get a list of valves that are currently open
-		$valvesCurrentlyOpen = getCurrentlyOpenValves();
-		
-		//
-		// get command lists
-		// 
-
-		// command lists
-		$valvesToOpen = array();
-		$valvesToClose = array();
-
-		// get the commands
-		getValveCommands($valvesRequiredToBeOpen, $valvesCurrentlyOpen, $valvesToOpen, $valvesToClose);
-
-		// execute the commands
-		executeValveCommands($valvesToOpen, $valvesToClose);
-
-		// update currently open valves. TODO get from hardware
-		updateCurrentlyOpenValves($valvesRequiredToBeOpen);
-
-		// print
-		logger_logEvent('Currently open valves: '.arrayToString($valvesCurrentlyOpen, ", "));
-		logger_logEvent('Valves required to be open: '.arrayToString($valvesRequiredToBeOpen, ", "));
-		logger_logEvent('Opening these valves: '.arrayToString($valvesToOpen, ", "));
-		logger_logEvent('Closing these valves: '.arrayToString($valvesToClose, ", "));
-
-		/*$foo = array();
-		$foo[0] = 2312;
-		$foo[1] = 222212;
-		echo arrayToString($foo, ", ");*/
-
-
-		// print
-		/* print 'Valve schedule: '.NEW_LINE;
-		print_r($weeklyValveSchedule); */
-
-
-		/*print 'Currently open valves: '.NEW_LINE;
-		print_r($valvesCurrentlyOpen);
-
-		// print
-		print ''.NEW_LINE;
-		print_r();
-
-		// print
-		print ''.NEW_LINE;
-		print_r();
-
-		// print
-		print ''.NEW_LINE;
-		print_r($valvesToClose);*/
-
+		// do the operate
+		operateValves_performActions();
 	}
 ?>
 

@@ -4,8 +4,9 @@
 <?php
 
 	// include stuff
-	include('schedule.inc');
-	include('logger.inc');
+	include_once('schedule.inc');
+	include_once('logger.inc');
+	include_once('operateValves.php');
 
 	// valve configuration object
 	$schedule_storedConfiguration = new Schedule();
@@ -164,6 +165,9 @@
 			// write
 			fwrite($fp, serialize($schedule_storedSchedule));
 			fclose($fp);
+
+			// operate the valves accordingly, don't wait for cron
+			operateValves_performActions();
 		}
 	}
 	else 

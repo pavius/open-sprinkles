@@ -35,7 +35,7 @@
 	}
 	
 	// the configuration of the valves
-	$schedule_configurationFileName = "scheduleConfiguration.cfg";
+	$schedule_configurationFileName = "state/schedule_weeklySchedule.cfg";
 	
 	// number of valves in the system
 	$schedule_numberOfValves = 8;

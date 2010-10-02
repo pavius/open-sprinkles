@@ -4,15 +4,12 @@
 ');
 
 	// set the logfile name
-	$logFileName = 'openSprinkles.log';
+	$logFileName = 'state/logger_loggedEvents.log';
 
 	// log an event
 	function logger_logEvent($event)
 	{
 		global $logFileName;
-
-		// set the logfile name
-		$logFileName = 'openSprinkles.log';
 
 		// add the date to the string
 		$logLine = '['.date('Ymd G:i:s').'] '.$event.NEW_LINE;
