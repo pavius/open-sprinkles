@@ -1,14 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml"> 
-<head>
-<title>
-OpenSprinkles
-</title>
-
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<link rel="stylesheet" href="images/Envision.css" type="text/css" />
-
-</head>
+<?php include('layout.inc'); ?>
+<?php echo layout_getPageHeader(); ?>
 
 <?php
 
@@ -211,76 +202,50 @@ OpenSprinkles
 	}
 ?>
 
-<body>
-	<div id="wrap">
-	  <div id="header">
-	    <h1 id="logo-text">OpenSprinkles</h1>
-	    <h2 id="slogan">freeware irrigation</h2>
-	    <div id="header-links">
-	      <p> version 0.0.1 | By Eran "pavius" Duchan | <a href="http://www.pavius.net/">More Info</a> </p>
-	    </div>
-	    <div id="current-time">
-	      <p> <?php echo date('D M j Y, G:i:s'); ?> </p>
-	    </div>
-	  </div>
-	  <div  id="menu">
-	    <ul>
-	      <li id="current"><a href="schedule.php">Schedule</a></li>
-	      <li><a href="status.php">Status</a></li>
-	      <li><a href="administration.php">Administration</a></li>
-	    </ul>
-	  </div>
-	  <div id="content-wrap">
-	    <div id="main"> <a name="TemplateInfo"></a>
-		  <form action="schedule.php" method="post">
-	      <h1>General Stuff</h1>
-	      	<div>
-				<table border="0" style="margin=0 0 0 0; padding=0 0 0 0;">
-				<tr>
-					<td class="general_config_name">Schedule is:</td>
-					<td>
-						<input type="radio" id="masterControlOn" name="masterControl" value="controlOn" <?php schedule_getMasterControl($schedule_storedSchedule, true); ?> /> Active  
-						<input type="radio" id="masterControlOff" name="masterControl" value="controlOff" <?php schedule_getMasterControl($schedule_storedSchedule, false); ?> /> Inactive 
-					</td>
-				</tr>
-				<tr>
-					<td class="general_config_name">Start at:</td>
-					<td>
-						<select name="startHour">
-							<?php	common_createDropDownListOptions('%02d', 0, 23, 1, $schedule_storedSchedule->startHour); ?>				  
-						</select> :
-						<select name="startMinutes">
-							<?php	common_createDropDownListOptions('%02d', 0, 45, 15, $schedule_storedSchedule->startMinutes); ?>
-						</select>
-					</td>
-					<td>
-						<input type="submit" id="scheduleSave" value=" Save " class="button" style="margin-left:375px;"/>
-					</td>
-				</tr>
-				<tr>
-					<td class="general_config_name">At most, open:</td>
-					<td>
-						<select name="maxConcurrentOpenValves">
-							<?php	common_createDropDownListOptions('%d', 1, $schedule_numberOfValves, 1, $schedule_storedSchedule->maxConcurrentOpenValves); ?>
-						</select>
-						 &nbsp valve(s) at a time
-					</td>
-				</tr>
-				</table>
-			</div>	      	
-			<div style="clear:both;"></div>
+<?php echo layout_getBodyHeader(); ?>
 
-	      	<h1>Irrigation Schedule</h1><br>
-			<div class="content">	      	
-	      		<?php schedule_outputValves($schedule_storedSchedule); ?>
-	      	</div>
-	      	</form>
+	<form action="schedule.php" method="post">
+	  <h1>General Stuff</h1>
+		<div>
+			<table border="0" style="margin=0 0 0 0; padding=0 0 0 0;">
+			<tr>
+				<td class="general_config_name">Schedule is:</td>
+				<td>
+					<input type="radio" id="masterControlOn" name="masterControl" value="controlOn" <?php schedule_getMasterControl($schedule_storedSchedule, true); ?> /> Active  
+					<input type="radio" id="masterControlOff" name="masterControl" value="controlOff" <?php schedule_getMasterControl($schedule_storedSchedule, false); ?> /> Inactive 
+				</td>
+			</tr>
+			<tr>
+				<td class="general_config_name">Start at:</td>
+				<td>
+					<select name="startHour">
+						<?php	common_createDropDownListOptions('%02d', 0, 23, 1, $schedule_storedSchedule->startHour); ?>				  
+					</select> :
+					<select name="startMinutes">
+						<?php	common_createDropDownListOptions('%02d', 0, 45, 15, $schedule_storedSchedule->startMinutes); ?>
+					</select>
+				</td>
+				<td>
+					<input type="submit" id="scheduleSave" value=" Save " class="button" style="margin-left:375px;"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="general_config_name">At most, open:</td>
+				<td>
+					<select name="maxConcurrentOpenValves">
+						<?php	common_createDropDownListOptions('%d', 1, $schedule_numberOfValves, 1, $schedule_storedSchedule->maxConcurrentOpenValves); ?>
+					</select>
+					 &nbsp valve(s) at a time
+				</td>
+			</tr>
+			</table>
+		</div>	      	
+		<div style="clear:both;"></div>
 
-	    </div>
-	  </div>
-	  <div id="footer">
-	    <p> Based on a CSS style by: <a href="http://www.styleshout.com/">styleshout</a>  </p>
-	  </div>
-	</div>
-</body>
-</html>
+		<h1>Irrigation Schedule</h1><br>
+		<div class="content">	      	
+			<?php schedule_outputValves($schedule_storedSchedule); ?>
+		</div>
+	</form>
+
+<?php echo layout_getBodyFooter(); ?>
