@@ -1,6 +1,22 @@
 <?php include('layout.inc'); ?>
 <?php echo layout_getPageHeader(); ?>
 
+<script type="text/javascript">
+
+	function showControl(rowId)
+	{
+        document.getElementById('valve' + rowId + '_control').style.display = '';
+		document.getElementById('valve' + rowId + '_days').style.display = 'none';
+    }
+
+	function showAuto(rowId)
+	{
+        document.getElementById('valve' + rowId + '_control').style.display = 'none';
+		document.getElementById('valve' + rowId + '_days').style.display = '';
+    }
+
+</script>
+
 <?php
 
 	// include stuff
@@ -75,7 +91,24 @@
 	{
 		// get days of week checkboxes
 		$daysOfWeek = schedule_getValveDays($storedSchedule, $valveIndex, array("S", "M", "T", "W", "T", "F", "S"));	
+		
+		// auto/manual
+		$autoRadioSelected = ""; $daysRowStyle = ""; 
+		$manualRadioSelected = ""; $controlRowStyle = ""; 
+
+		// get selected according to mode
+		if ($storedSchedule->valves[$valveIndex]->mode == 0)
+		{
+			$autoRadioSelected = "checked";
+			$controlRowStyle = "display:none;";
+		}
+		else
+		{
+			$manualRadioSelected = "checked";
+			$daysRowStyle = "display:none;";
+		}
 				
+
 		// echo it
 		echo '<div class="valve_wrapper" style="'.$style.'">		
 				<fieldset class="base">
@@ -87,10 +120,24 @@
 					<td><input type="text" size="16" name="valve'.$valveIndex.'_name" value="'.$storedSchedule->valves[$valveIndex]->name.'" class = "styled_input"/></td>
 				</tr>
 				<tr>
+					<td class="valve_value_name">Mode:</td>
+					<td>
+						<input type="radio" name="valve'.$valveIndex.'_mode" value="auto" onClick="showAuto('.$valveIndex.')" '.$autoRadioSelected.'/> Auto &nbsp&nbsp 
+						<input type="radio" name="valve'.$valveIndex.'_mode" value="manual" onClick="showControl('.$valveIndex.')" '.$manualRadioSelected.'/> Manual
+					</td>
+				</tr>
+				<tr id="valve'.$valveIndex.'_days" style="'.$daysRowStyle.'" >
 					<td class="valve_value_name">Days:</td>
 					<td>
 					<div style="float:left;">'.$daysOfWeek.'</div>
 					<div style="clear:both;"></div>		
+					</td>
+				</tr>
+				<tr id="valve'.$valveIndex.'_control" style="'.$controlRowStyle.'" >
+					<td class="valve_value_name"></td>
+					<td>
+						<input type="submit" id="valve'.$valveIndex.'_turnOn" value="Turn on" class="buttonTurnOn" /> &nbsp
+						<input type="submit" id="valve'.$valveIndex.'_turnOn" value="Turn off" class="buttonTurnOff" />
 					</td>
 				</tr>
 				<tr>
@@ -132,6 +179,10 @@
 			$valve->name = $_POST['valve'.$valveIndex.'_name'];
 			$valve->operationDurationInMinutes = $_POST['valve'.$valveIndex.'_duration'];
 			
+			// set mode
+			if ($_POST['valve'.$valveIndex.'_mode'] == 'auto') 	$valve->mode = 0;
+			else												$valve->mode = 1;						
+
 			// iterate dow
 			for ($dayIndex = 0; $dayIndex < 7; $dayIndex++)
 			{

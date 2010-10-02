@@ -32,6 +32,10 @@
 	
 	    // duration, in minutes of operation
 	    var $operationDurationInMinutes;
+
+	    // mode (0 = auto, 1 = manual)
+	    // TODO: enum
+	    var $mode;
 	}
 	
 	// the configuration of the valves

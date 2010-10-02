@@ -155,6 +155,22 @@ input.button {
 	border: none;
 }
 
+input.buttonTurnOn { 
+	font: 11px Arial, Sans-serif; 
+	height: 20px;
+	margin: 0;
+	padding: 2px 3px; 
+	border: none;
+}
+
+input.buttonTurnOff { 
+	font: 11px Arial, Sans-serif; 
+	height: 20px;
+	margin: 0;
+	padding: 2px 3px; 
+	border: none;
+}
+
 select {
 	font: normal 1em Verdana, sans-serif;
 	color:#444;
