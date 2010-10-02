@@ -136,8 +136,8 @@
 				<tr id="valve'.$valveIndex.'_control" style="'.$controlRowStyle.'" >
 					<td class="valve_value_name"></td>
 					<td>
-						<input type="submit" id="valve'.$valveIndex.'_turnOn" value="Turn on" class="buttonTurnOn" /> &nbsp
-						<input type="submit" id="valve'.$valveIndex.'_turnOn" value="Turn off" class="buttonTurnOff" />
+						<input type="submit" name="valve'.$valveIndex.'_turnOn" value="Turn on" class="buttonTurnOn" /> &nbsp
+						<input type="submit" name="valve'.$valveIndex.'_turnOff" value="Turn off" class="buttonTurnOff" />
 					</td>
 				</tr>
 				<tr>
@@ -277,11 +277,30 @@
 		// update the schedule with data from the form
 		schedule_loadPostedFormToSchedule($schedule_storedSchedule);
 
+		// check if a turn on/off button has been pressed
+		for ($valveIndex = 0; $valveIndex < $schedule_numberOfValves; ++$valveIndex)
+		{
+			// check if a valve has been turned on
+			if (isset($_POST['valve'.$valveIndex.'_turnOn']))
+			{
+				// set teh valve manual time to now
+				$schedule_storedSchedule->valves[$valveIndex]->manualStartTime = operateValves_getCurrentMinutesOffsetIntoWeek();
+				break;
+			}
+
+			if (isset($_POST['valve'.$valveIndex.'_turnOff']))
+			{
+				// reset the valve manual time
+				$schedule_storedSchedule->valves[$valveIndex]->manualStartTime = -1;
+				break;
+			}
+		}
+
 		// save to file
 		if (schedule_saveScheduleToFile($schedule_storedSchedule, $schedule_configurationFileName))
 		{
 			// operate the valves now, don't wait for cron
-			operateValves_performActions();
+			operateValves_performActions($schedule_storedSchedule);
 		}
 	}
 	else 
@@ -330,7 +349,7 @@
 					</select>
 				</td>
 				<td>
-					<input type="submit" id="scheduleSave" value=" Save " class="button" style="margin-left:375px;"/>
+					<input type="submit" name="scheduleSave" value=" Save " class="button" style="margin-left:375px;"/>
 				</td>
 			</tr>
 			<tr>
