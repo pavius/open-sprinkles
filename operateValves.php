@@ -43,7 +43,7 @@
 	//
 
 	// temporary valve state filename
-	$operateValves_currentlyOpenValvesFileName = 'openValves_currentlyOpenValves.cfg';
+	$operateValves_currentlyOpenValvesFileName = 'operateValves_currentlyOpenValves.cfg';
 
 	//
 	// Local routines
